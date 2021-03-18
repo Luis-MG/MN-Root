@@ -1,0 +1,73 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+
+<form id="frmadd">     {% csrf_token %}
+
+    <p class="h3">Ingrese datos:</p>
+    <div class="input-group mb-3 ">
+      <span class="input-group-text" id="basic-addon1">f(x)=</span>
+      <input type="text" name="f" class="form-control " placeholder="funcion" aria-label="f" aria-describedby="basic-addon1">
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Xi</span>
+      <input type="text" name="Xi" class="form-control" placeholder="Valor inferior" aria-label="Xi">
+    </div>
+        <div class="input-group mb-3">
+      <span class="input-group-text">Xu</span>
+      <input type="text" name="Xu" class="form-control" placeholder="Valor superior" aria-label="Xu">
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text " id="basic-addon1">n</span>
+      <input type="text" name="n" class="form-control" placeholder="Cifras Significativas" aria-label="n" aria-describedby="basic-addon1">
+    </div>
+    
+</form>
+<button id="submit" class="btn btn-primary">Calcular</button>
+<div id="result">
+
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+       
+        $('#submit').click(function(){
+
+            $.ajax({
+                url: 'biseccion/',
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.parse(toJSONString("frmadd")),
+                cache: 'false'
+                }).done(function(data) {    
+                     $('#result').text(data['data']);
+                });
+
+        })
+
+    });
+
+    function toJSONString(form) {
+        var form = document.getElementById(form);
+        var obj = {};
+        var elements = form.querySelectorAll("input");
+        for (var i = 0; i < elements.length; ++i) {
+        var element = elements[i];
+        var name = element.name;
+        var value = element.value;
+
+        if (name) {
+            obj[name] = value;
+        }
+        }
+        console.log(JSON.stringify(obj));
+        return JSON.stringify(obj);
+    }
+</script>
+
+{% endblock %}

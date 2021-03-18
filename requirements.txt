@@ -1,0 +1,6 @@
+Django==3.1.7
+whitenoise
+sympy
+pandas
+numpy
+matplotlib
