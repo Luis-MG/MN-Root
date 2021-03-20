@@ -28,6 +28,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('admin/', admin.site.urls),
     path('biseccion/', views.biseccion, name='biseccion' ),
-
+    path('rapshon_newton/', views.rapshon_newton, name='rapshon_newton' ),
 
 ]

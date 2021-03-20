@@ -2,32 +2,94 @@
 
 {% block content %}
 
+<div>
+    <form id="frmadd">     {% csrf_token %}
 
-<form id="frmadd">     {% csrf_token %}
-
-    <p class="h3">Ingrese datos:</p>
-    <div class="input-group mb-3 ">
-      <span class="input-group-text" id="basic-addon1">f(x)=</span>
-      <input type="text" name="f" class="form-control " placeholder="funcion" aria-label="f" aria-describedby="basic-addon1">
-    </div>
-    <div class="input-group mb-3">
-      <span class="input-group-text">Xi</span>
-      <input type="text" name="Xi" class="form-control" placeholder="Valor inferior" aria-label="Xi">
-    </div>
+        <p class="h4">Ingrese datos:</p>
+        <div class="input-group mb-3 ">
+          <span class="input-group-text" id="f">f(x)=</span>
+          <input type="text" name="f" class="form-control " placeholder="funcion" aria-label="f" aria-describedby="f">
+        </div>
         <div class="input-group mb-3">
-      <span class="input-group-text">Xu</span>
-      <input type="text" name="Xu" class="form-control" placeholder="Valor superior" aria-label="Xu">
-    </div>
-    <div class="input-group mb-3">
-      <span class="input-group-text " id="basic-addon1">n</span>
-      <input type="text" name="n" class="form-control" placeholder="Cifras Significativas" aria-label="n" aria-describedby="basic-addon1">
-    </div>
-    
-</form>
-<button id="submit" class="btn btn-primary">Calcular</button>
-<div id="result">
+          <span class="input-group-text">Xi</span>
+          <input type="text" name="Xi" class="form-control" placeholder="Valor inferior" aria-label="Xi">
+        </div>
+            <div class="input-group mb-3">
+          <span class="input-group-text">Xu</span>
+          <input type="text" name="Xu" class="form-control" placeholder="Valor superior" aria-label="Xu">
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text " id="basic-addon1">n</span>
+          <input type="text" name="n" class="form-control" placeholder="Cifras Significativas" aria-label="n" aria-describedby="n">
+        </div>
 
+    <h5>Metodo Cerrado</h5>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="method" id="method_bi" value="biseccion" checked>
+          <label class="form-check-label" for="method_bi">
+            Biseccion
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="method" value="regla_falsa" id="method_rf" >
+          <label class="form-check-label" for="method_rf">
+            Regla falsa
+          </label>
+        </div>
+
+    <h5>Metodo Abierto</h5>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="method" value="rapshon_newton" id="method_rn" >
+          <label class="form-check-label" for="method_rn">
+            Raphson-Newton
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="method" value="secante" id="method_se">
+          <label class="form-check-label" for="method_se">
+            Secante
+          </label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="radio" name="method" value="s" id="method_s" >
+          <label class="form-check-label" for="method_">
+            ----
+          </label>
+        </div>
+
+    </form>
+    <button id="submit" class="btn btn-primary">
+    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+    Calcular
+    </button>
 </div>
+ <hr/>
+    <div >
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="">Error estimado</span>
+          <input id="Es" type="text" class="form-control text-success" placeholder="" aria-label="Error_estimado" aria-describedby="Error_estimado" disabled>
+        </div>
+
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="">Raiz</span>
+          <input id="raiz" type="text" class="form-control text-success" placeholder="" aria-label="Raiz" aria-describedby="Raiz" disabled >
+        </div>
+    </div>
+<hr/>
+<div>
+    <table class="table table-bordered" id="dt" width="100%" cellspacing="0">
+        <thead>
+            <tr id="td_cab">
+
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+
 
 
 {% endblock %}
@@ -37,16 +99,63 @@
     $(document).ready(function() {
        
         $('#submit').click(function(){
+            var method = $("input[type='radio'][name='method']:checked").val() + "/";
+            $('#td_cab').empty()
+            $('tbody').empty()
+            if (method == "biseccion/") {
+                $('#td_cab').html(
+                    " <th>Iteracion</th>" +
+                    "<th>Xi</th>" +
+                    "<th>Xu</th>" +
+                    "<th>Xr</th>" +
+                    "<th>f(Xi)</th>" +
+                    "<th>f(Xr)</th>" +
+                    "<th>f(Xi)*f(Xr)</th>" +
+                    "<th>Ea</th>"
+                )
+            } else if (method == "rapshon_newton/") {
+                $('#td_cab').html(
+                    " <th>Iteracion</th>" +
+                    "<th>Xi</th>" +
+                    "<th>f(Xi)</th>" +
+                    "<th>f'(Xi)</th>" +
+                    "<th>Xi+1</th>" +
+                    "<th>Ea</th>"
+                )
 
+            }
+           
+
+
+
+
+            /*console.log($("#dt th").length)*/
+        /*        */
+
+            
+            
             $.ajax({
-                url: 'biseccion/',
+                url: method,
                 type: 'POST',
                 dataType: 'json',
                 data: JSON.parse(toJSONString("frmadd")),
                 cache: 'false'
                 }).done(function(data) {    
-                     $('#result').text(data['data']);
+                    $('#raiz').val(data['result'][0]['root']);
+                    $('#Es').val(data['result'][0]['Es']);
+                    for (i = 0; i < data['rows'].length; i++) {
+                        $('tbody').append("<tr id='r"+i+"'></tr>")
+                        for (j = 0; j < $("#dt th").length; j++){
+                            $("#r"+i).append(
+                                "<td>" +
+                                data['rows'][i][j] +
+                                "</td>"
+                            )
+                        }
+                    }
+                    
                 });
+                
 
         })
 
@@ -57,13 +166,17 @@
         var obj = {};
         var elements = form.querySelectorAll("input");
         for (var i = 0; i < elements.length; ++i) {
-        var element = elements[i];
-        var name = element.name;
-        var value = element.value;
+            var element = elements[i];
+            var name = element.name;
+            var value = element.value;
 
-        if (name) {
-            obj[name] = value;
-        }
+            if (name) {
+                obj[name] = value;
+                if (name == 'method') {
+                    obj[name] = $("input[type='radio'][name='method']:checked").val();
+                }
+            }
+            
         }
         console.log(JSON.stringify(obj));
         return JSON.stringify(obj);
