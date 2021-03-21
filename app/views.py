@@ -91,9 +91,9 @@ def biseccion(request):
         i=i+1  
         data.append([str(i),str(Xi_old),str(Xu_old),str(Xr),str(Fxi),str(Fxu),str(prodF),str(Ea)])
     root = Xr
-
+    f = latex(expr)
     #data = request.POST.get("f")
-    return JsonResponse({'result':[{'root':root,'Es':Es}],'rows':data})
+    return JsonResponse({'result':[{'root':root,'Es':Es,'f':f}],'rows':data})
 
 def rapshon_newton(request):
     a= symbols("x")
@@ -119,5 +119,40 @@ def rapshon_newton(request):
         i=i+1  
         data.append([str(i),str(Xi_old),str(Fxi),str(Fprim_xi),str(Xi_nxt),str(Ea)])
     root = Xi_nxt
+    f = latex(expr)
+    expr_diff = latex(expr_diff)
+    return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f,"fprim":str(expr_diff)}],'rows':data})
 
-    return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f'(x)":str(expr_diff)}],'rows':data})
+def secante(request):
+    Xi = float(request.POST.get('Xi'))
+    expr = request.POST.get('f')
+    n =  int(request.POST.get('n'))
+    a= symbols("x")
+    Xi_nxt = 0
+    Xi_nxt_old = 0
+    Xi_ant = 0
+    Ea = 100
+    i = 0
+    Fxi = 0
+    Fxi_ant = 0
+    data = []
+    Es = (0.5*(10**(2-n)))
+    expr = parse_expr(expr)
+    while Ea > Es:
+        if i < 1:
+            Xi_ant = Xi-1
+        elif i > 0 :
+            Xi_ant = Xi_old
+        Xi_old = Xi
+        Xi_nxt_old = Xi_nxt
+        Fxi = expr.subs(a,Xi)
+        Fxi_ant = expr.subs(a,Xi_ant)
+        Xi_nxt = Xi-((Fxi*(Xi_ant-Xi))/(Fxi_ant-Fxi))
+        Xi = Xi_nxt
+        if i >= 1:
+            Ea = abs(((Xi_nxt_old-Xi_nxt)/Xi_nxt))*100
+        i=i+1  
+        data.append([str(i),str(Xi_old),str(Xi_ant),str(Xi_nxt),str(Fxi),str(Fxi_ant),str(Ea)])
+    root = Xi_nxt
+    f = latex(expr)
+    return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f}],'rows':data})
