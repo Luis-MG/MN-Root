@@ -29,5 +29,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('biseccion/', views.biseccion, name='biseccion' ),
     path('rapshon_newton/', views.rapshon_newton, name='rapshon_newton' ),
+    path('secante/', views.secante, name='secante' ),
 
 ]

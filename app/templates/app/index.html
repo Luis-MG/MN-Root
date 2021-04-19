@@ -9,18 +9,73 @@
         <div class="input-group mb-3 ">
           <span class="input-group-text" id="f">f(x)=</span>
           <input type="text" name="f" class="form-control " placeholder="funcion" aria-label="f" aria-describedby="f">
+          <div id="msg_error_f"></div>
         </div>
         <div class="input-group mb-3">
           <span class="input-group-text">Xi</span>
           <input type="text" name="Xi" class="form-control" placeholder="Valor inferior" aria-label="Xi">
+            <div id="msg_error_Xi"></div>
         </div>
             <div class="input-group mb-3">
           <span class="input-group-text">Xu</span>
           <input type="text" name="Xu" class="form-control" placeholder="Valor superior" aria-label="Xu">
+                <div id="msg_error_Xu"></div>
         </div>
         <div class="input-group mb-3">
           <span class="input-group-text " id="basic-addon1">n</span>
           <input type="text" name="n" class="form-control" placeholder="Cifras Significativas" aria-label="n" aria-describedby="n">
+            <div id="msg_error_n"></div>
+        </div>
+
+        <p>
+            <a class="btn  btn-outline-primary" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">Ayuda</a>
+        </p>
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                   <div class="card border-primary mb-3" style="max-width: 18rem;">
+                      <div class="card-header">Formato</div>
+                      <div class="card-body text-secondary">
+                        <h5 class="card-title">Decimales</h5>
+                        <p class="card-text">Usa el punto {.} para expresar decimales<br /> Ej. 0.5</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                   <div class="card border-primary mb-3" style="max-width: 18rem;">
+                      <div class="card-header">Formato</div>
+                      <div class="card-body text-secondary">
+                        <h5 class="card-title">Potencias</h5>
+                        <p class="card-text">Usa doble asterisco {**} para expresar potencias<br /> Ej. x**5</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                   <div class="card border-primary mb-3" style="max-width: 18rem;">
+                      <div class="card-header">Formato</div>
+                      <div class="card-body text-secondary">
+                        <h5 class="card-title">Parentesis</h5>
+                        <p class="card-text">El orden de las operaciones matematicas se realiza del parentesis interno al externo<br /> Ej. 5*(4-2)/(5-5) = 10</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                   <div class="card border-primary mb-3" style="max-width: 18rem;">
+                      <div class="card-header">Formato</div>
+                      <div class="card-body text-secondary">
+                        <h5 class="card-title">Para funciones compuestas</h5>
+                        <p class="card-text">Usa {ln()} para expresar logarimos naturales<br /> Ej. ln(1)</p>
+                          <p class="card-text">Usa {exp()} para expresar exponenciales<br /> Ej. exp(1.25)</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     <h5>Metodo Cerrado</h5>
@@ -39,19 +94,19 @@
 
     <h5>Metodo Abierto</h5>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="method" value="rapshon_newton" id="method_rn" >
+          <input class="form-check-input method_a" type="radio" name="method" value="rapshon_newton" id="method_rn" >
           <label class="form-check-label" for="method_rn">
             Raphson-Newton
           </label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="method" value="secante" id="method_se">
+          <input class="form-check-input method_a" type="radio" name="method" value="secante" id="method_se">
           <label class="form-check-label" for="method_se">
             Secante
           </label>
         </div>
         <div class="form-check mb-3">
-          <input class="form-check-input" type="radio" name="method" value="s" id="method_s" >
+          <input class="form-check-input method_a" type="radio" name="method" value="s" id="method_s" >
           <label class="form-check-label" for="method_">
             ----
           </label>
@@ -59,11 +114,24 @@
 
     </form>
     <button id="submit" class="btn btn-primary">
-    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+    <span id="submit_text" class="" role="status" aria-hidden="true"></span>
     Calcular
     </button>
 </div>
  <hr/>
+<div class="card mb-3">
+  <div class="card-header">
+    Ecuaciones
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Ecuacion</h5>
+    <p id="latex_f" class="card-text"> </p>
+  </div>
+      <div id="prim_container" class="card-body">
+    <h5 class="card-title">Primera Derivada</h5>
+    <p id="latex_fprim" class="card-text"></p>
+  </div>
+</div>
     <div >
         <div class="input-group mb-3">
           <span class="input-group-text" id="">Error estimado</span>
@@ -76,9 +144,9 @@
         </div>
     </div>
 <hr/>
-<div>
-    <table class="table table-bordered" id="dt" width="100%" cellspacing="0">
-        <thead>
+<div class="table-responsive">
+    <table class="table table-hover table-responsive" id="dt" width="100%" cellspacing="0">
+        <thead class="table-dark">
             <tr id="td_cab">
 
             </tr>
@@ -96,8 +164,77 @@
 
 {% block scripts %}
 <script>
-    $(document).ready(function() {
-       
+        $(document).ready(function() {
+
+            $.validator.addMethod("regex", function(value, element, regex_exp) {
+              return regex_exp.test(value)
+            },"Ecuacion invalida");
+
+            jQuery.validator.setDefaults({
+            debug: true,
+            success: "valid"
+        });
+            $("#frmadd").validate({
+            rules: {
+                f: {
+                    required: true,
+                    regex:/(?:[0-9-+*/^()x]|abs|e\^x|ln|log|a?(?:sin|cos|tan)h?)+/,
+                },
+                Xi: {
+                    required: true,
+                    number: true
+                },
+                Xu: {
+                    required: true,
+                    number: true
+                },
+                n: {
+                    required: true,
+                    number: true,
+                   
+                }
+                
+            },
+            messages: {
+                 f: {
+                    required: "Campo obligatorio",
+                                        
+                },
+                Xi: {
+                    required: "Campo obligatorio",
+                    number: "Solo numeros (decimales con punto {.})"
+                },
+                Xu: {
+                    required: "Campo obligatorio",
+                    number: "Solo numeros (decimales con punto {.})"
+                },
+                n: {
+                    required: "Campo obligatorio",
+                    digits: "Solo enteros",
+                   
+                }
+            },
+            errorContainer: "#msg_error_f, #msg_error_Xi, #msg_error_Xu, #msg_error_n",
+            errorPlacement: function(label, element) {
+                label.addClass('invalid-feedback');
+                label.insertAfter(element);
+            },
+        });
+
+        $('input:radio').click(function () {
+            if ($(this).hasClass("method_a")) {
+                $("input[name='Xu']").attr('disabled', true);
+            } else {
+                $("input[name='Xu']").attr('disabled', false);
+            }
+            if ($(this).val() != "rapshon_newton") {
+                $('#prim_container').hide();
+            } else {
+                $('#prim_container').show();
+            }
+
+        })
+
         $('#submit').click(function(){
             var method = $("input[type='radio'][name='method']:checked").val() + "/";
             $('#td_cab').empty()
@@ -122,6 +259,16 @@
                     "<th>Xi+1</th>" +
                     "<th>Ea</th>"
                 )
+            } else if (method == "secante/") {
+                $('#td_cab').html(
+                    " <th>Iteracion</th>" +
+                    "<th>Xi</th>" +
+                    "<th>Xi-1</th>" +
+                    "<th>Xi+1</th>" +
+                    "<th>f(Xi)</th>" +
+                    "<th>f(Xi-1)</th>" +
+                    "<th>Ea</th>"
+                )
 
             }
            
@@ -139,7 +286,11 @@
                 type: 'POST',
                 dataType: 'json',
                 data: JSON.parse(toJSONString("frmadd")),
-                cache: 'false'
+                cache: 'false',
+                beforeSend: function() {
+                // setting a timeout
+                $('#submit_text').addClass('spinner-grow spinner-grow-sm');
+                }
                 }).done(function(data) {    
                     $('#raiz').val(data['result'][0]['root']);
                     $('#Es').val(data['result'][0]['Es']);
@@ -151,9 +302,17 @@
                                 data['rows'][i][j] +
                                 "</td>"
                             )
-                        }
+                        }   
                     }
-                    
+                    console.log("$$"+data['result'][0]['f']+"$$")
+                    $('#latex_f').text("$$f(x)="+data['result'][0]['f']+"$$")
+                    MathJax.typeset(["#latex_f"]);
+
+                    if (method == "rapshon_newton/") {
+                        $('#latex_fprim').text("$$f'(x)=" + data['result'][0]['fprim'] + "$$")
+                        MathJax.typeset(["#latex_fprim"]);
+                    }
+                    $('#submit_text').removeClass('spinner-grow spinner-grow-sm');
                 });
                 
 
