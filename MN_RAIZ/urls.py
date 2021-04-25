@@ -28,7 +28,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('admin/', admin.site.urls),
     path('biseccion/', views.biseccion, name='biseccion' ),
+    path('regla_falsa/', views.regla_falsa, name='regla_falsa' ),
     path('rapshon_newton/', views.rapshon_newton, name='rapshon_newton' ),
     path('secante/', views.secante, name='secante' ),
-
+    path('punto_fijo/', views.punto_fijo, name='punto_fijo' ),
 ]

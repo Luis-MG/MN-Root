@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - My Django Application</title>
+    <title>{{ title }} </title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'app/content/site.css' %}" />
@@ -13,18 +13,25 @@
 <script type="text/javascript" id="MathJax-script" async
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
 </script>
+    
 </head>
   
 <body>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+
+    <div class="container body-content">
+              <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">METODOS NUMERICOS | </a>
+        <a class="navbar-brand" href="#">
+            <img src="https://pbs.twimg.com/profile_images/2224353808/Escudopngmini_400x400.png" alt="" width="90" height="90" class="d-inline-block align-text-top">   
+        </a>
+        <a class="navbar-brand" href="#"> METODOS NUMERICOS | </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
-            <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
+            <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Raices</a>
               <!--
             <a class="nav-link active" aria-current="page" href="{% url 'about' %}">About</a>
             <a class="nav-link active" aria-current="page" href="{% url 'contact' %}">Contact</a>
@@ -33,8 +40,6 @@
         </div>
       </div>
     </nav>
-
-    <div class="container body-content">
 {% block content %}{% endblock %}
         <hr/>
         <footer>
@@ -48,6 +53,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.24/datatables.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
+    <script src="https://www.geogebra.org/apps/deployggb.js"></script>
 {% block scripts %}{% endblock %}
 
 </body>

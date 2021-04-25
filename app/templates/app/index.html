@@ -11,6 +11,11 @@
           <input type="text" name="f" class="form-control " placeholder="funcion" aria-label="f" aria-describedby="f">
           <div id="msg_error_f"></div>
         </div>
+        <div id="input-cont-g" class="input-group mb-3 " style="display:none">
+          <span class="input-group-text" id="g">g(x)=</span>
+          <input type="text" name="g" class="form-control " placeholder="funcion" aria-label="g" aria-describedby="g" disabled>
+          <div id="msg_error_g"></div>
+        </div>
         <div class="input-group mb-3">
           <span class="input-group-text">Xi</span>
           <input type="text" name="Xi" class="form-control" placeholder="Valor inferior" aria-label="Xi">
@@ -106,9 +111,9 @@
           </label>
         </div>
         <div class="form-check mb-3">
-          <input class="form-check-input method_a" type="radio" name="method" value="s" id="method_s" >
+          <input class="form-check-input method_a" type="radio" name="method" value="punto_fijo" id="method_s" >
           <label class="form-check-label" for="method_">
-            ----
+            Punto Fijo
           </label>
         </div>
 
@@ -127,9 +132,13 @@
     <h5 class="card-title">Ecuacion</h5>
     <p id="latex_f" class="card-text"> </p>
   </div>
-      <div id="prim_container" class="card-body">
+  <div id="prim_container" class="card-body" style="display:none">
     <h5 class="card-title">Primera Derivada</h5>
     <p id="latex_fprim" class="card-text"></p>
+  </div>
+  <div id="g_container" class="card-body" style="display:none">
+    <h5 class="card-title">Ecuacion g</h5>
+    <p id="latex_g" class="card-text"></p>
   </div>
 </div>
     <div >
@@ -144,6 +153,7 @@
         </div>
     </div>
 <hr/>
+<p class="h4">Tabla de datos:</p>
 <div class="table-responsive">
     <table class="table table-hover table-responsive" id="dt" width="100%" cellspacing="0">
         <thead class="table-dark">
@@ -157,18 +167,58 @@
     </table>
 </div>
 
-
+<!-- Modal -->
+<div class="modal fade" id="modalAlert" tabindex="-1" role="dialog" aria-labelledby="modalAlert" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle"></h5>
+        <button type="button" class="close btnClosemodal" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div id="modalMsg" class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+        <button  type="button" class="btn btn-secondary btnClosemodal" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<hr />
+<p class="h4">Graficadora (Geogebra).</p>
+<div id="ggb-element"></div> 
 
 
 {% endblock %}
 
 {% block scripts %}
+
+
+
 <script>
-        $(document).ready(function() {
+    $(document).ready(function () {
+
+    //GEOGEBRA API
+    var params = { "appName": "graphing", "width": 800, "height": 600, "showToolBar": true, "showAlgebraInput": true, "showMenuBar": true, "showAlgebraInput": true };
+    var geogebapp = new GGBApplet(params, true);
+    window.addEventListener("load", function() { 
+        geogebapp.inject('ggb-element');
+    });
+    
+    /*function evalInput(strInput) {
+		ggbApplet.evalCommand(strInput);
+		return false;
+	}*/
+        
+        $('button.btnClosemodal').click(function () {
+             $('#modalAlert').modal('toggle');
+        });
 
             $.validator.addMethod("regex", function(value, element, regex_exp) {
               return regex_exp.test(value)
-            },"Ecuacion invalida");
+            },"Ecuacion invalida. Exprese la ecuacion en terminos de x");
 
             jQuery.validator.setDefaults({
             debug: true,
@@ -177,6 +227,10 @@
             $("#frmadd").validate({
             rules: {
                 f: {
+                    required: true,
+                    regex:/(?:[0-9-+*/^()x]|abs|e\^x|ln|log|a?(?:sin|cos|tan)h?)+/,
+                },
+                g: {
                     required: true,
                     regex:/(?:[0-9-+*/^()x]|abs|e\^x|ln|log|a?(?:sin|cos|tan)h?)+/,
                 },
@@ -191,6 +245,7 @@
                 n: {
                     required: true,
                     number: true,
+                    digits: true
                    
                 }
                 
@@ -210,7 +265,8 @@
                 },
                 n: {
                     required: "Campo obligatorio",
-                    digits: "Solo enteros",
+                    number: "Solo numeros enteros",
+                    digits: "Solo numeros enteros"
                    
                 }
             },
@@ -231,6 +287,15 @@
                 $('#prim_container').hide();
             } else {
                 $('#prim_container').show();
+            }
+            if ($(this).val() != "punto_fijo") {
+                $("input[name='g']").attr('disabled', true);
+                $("#input-cont-g").hide();
+                $('#g_container').hide();
+            } else {
+                $("input[name='g']").attr('disabled', false);
+                $("#input-cont-g").show();
+                $('#g_container').show();
             }
 
         })
@@ -270,6 +335,23 @@
                     "<th>Ea</th>"
                 )
 
+            } else if (method == "regla_falsa/") {
+                $('#td_cab').html(
+                    " <th>Iteracion</th>" +
+                    "<th>Xi</th>" +
+                    "<th>Xu</th>" +
+                    "<th>f(Xi)</th>" +
+                    "<th>f(Xu)</th>" +
+                    "<th>r</th>" +
+                    "<th>f(r)</th>" +
+                    "<th>Ea</th>" 
+                )
+            } else if (method == "punto_fijo/") {
+                $('#td_cab').html(
+                    " <th>Iteracion</th>" +
+                    "<th>g(Xi)</th>" +
+                    "<th>Ea</th>" 
+                )
             }
            
 
@@ -279,43 +361,62 @@
             /*console.log($("#dt th").length)*/
         /*        */
 
-            
-            
-            $.ajax({
-                url: method,
-                type: 'POST',
-                dataType: 'json',
-                data: JSON.parse(toJSONString("frmadd")),
-                cache: 'false',
-                beforeSend: function() {
-                // setting a timeout
-                $('#submit_text').addClass('spinner-grow spinner-grow-sm');
-                }
-                }).done(function(data) {    
-                    $('#raiz').val(data['result'][0]['root']);
-                    $('#Es').val(data['result'][0]['Es']);
-                    for (i = 0; i < data['rows'].length; i++) {
-                        $('tbody').append("<tr id='r"+i+"'></tr>")
-                        for (j = 0; j < $("#dt th").length; j++){
-                            $("#r"+i).append(
-                                "<td>" +
-                                data['rows'][i][j] +
-                                "</td>"
-                            )
-                        }   
-                    }
-                    console.log("$$"+data['result'][0]['f']+"$$")
-                    $('#latex_f').text("$$f(x)="+data['result'][0]['f']+"$$")
-                    MathJax.typeset(["#latex_f"]);
+            if ($("#frmadd").valid() == true) {
 
-                    if (method == "rapshon_newton/") {
-                        $('#latex_fprim').text("$$f'(x)=" + data['result'][0]['fprim'] + "$$")
-                        MathJax.typeset(["#latex_fprim"]);
+
+                $.ajax({
+                    url: method,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: JSON.parse(toJSONString("frmadd")),
+                    cache: 'false',
+                    beforeSend: function () {
+                        // setting a timeout
+                        $('#submit_text').addClass('spinner-grow spinner-grow-sm');
                     }
+                }).done(function (data) {
+                    if (data['code'] == 1) {
+                        $('#modalTitle').html('Error');
+                        $('#modalMsg').html(data['msg']);
+                        $('#modalAlert').modal('toggle');
+
+                    } else {
+                        $('#raiz').val(data['result'][0]['root']);
+                        $('#Es').val(data['result'][0]['Es']);
+                        for (i = 0; i < data['rows'].length; i++) {
+                            $('tbody').append("<tr id='r" + i + "'></tr>")
+                            for (j = 0; j < $("#dt th").length; j++) {
+                                $("#r" + i).append(
+                                    "<td>" +
+                                    data['rows'][i][j] +
+                                    "</td>"
+                                )
+                            }
+                        }
+                        console.log("$$" + data['result'][0]['f'] + "$$")
+                        $('#latex_f').text("$$f(x)=" + data['result'][0]['f'] + "$$")
+                        MathJax.typeset(["#latex_f"]);
+
+                        if (method == "rapshon_newton/") {
+                            $('#latex_fprim').text("$$f'(x)=" + data['result'][0]['fprim'] + "$$")
+                            MathJax.typeset(["#latex_fprim"]);
+                        } else if (method == "punto_fijo/") {
+                            $('#latex_g').text("$$g(x)=" + data['result'][0]['g'] + "$$")
+                            MathJax.typeset(["#latex_g"]);
+                        }
+                        ggbApplet.evalCommand($('input:eq(1)').val());
+                    }
+                    
                     $('#submit_text').removeClass('spinner-grow spinner-grow-sm');
                 });
-                
 
+            }
+            else
+            {
+                $('#modalTitle').html('Error');
+                $('#modalMsg').html("Los campos no cumplen las condiciones.");
+                $('#modalAlert').modal('toggle');
+            }
         })
 
     });

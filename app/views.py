@@ -9,6 +9,9 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.http import QueryDict
 from sympy import *
+import numpy as np
+import math
+
 
 
 
@@ -52,6 +55,8 @@ def about(request):
 
 
 def biseccion(request):
+    msg=""
+    cnv=1
     a= symbols('x')
     Xi = float(request.POST.get('Xi'))
     Xu = float(request.POST.get('Xu'))
@@ -67,35 +72,153 @@ def biseccion(request):
     prodF = 0
     Xr_old = 0
     data = []
-    Es = (0.5*(10**(2-n)))
-    #expr = expr.replace("ln","math.log")
-    expr = parse_expr(expr)
+    try:
+        Es = (0.5*(10**(2-n)))
+        #expr = expr.replace("ln","math.log")
+        expr = parse_expr(expr)
+    
+        Fxi = round(expr.subs(a,Xi),n)#expr.subs(a,Xi)
+        Fxu = round(expr.subs(a,Xu),n)
 
-    while Ea > Es:
-        Xr_old = Xr
-        Xu_old = Xu
-        Xi_old = Xi
-        Xr = float((Xi+Xu)/2)
-        Fxi = expr.subs(a,Xi)
-        Fxu = expr.subs(a,Xr)
-        prodF = Fxi*Fxu
-        if prodF < 0:
-            Xi = Xi
-            Xu = Xr  
-        elif prodF > 0:
-            Xi = Xr
-            Xu = Xu        
+        if Fxi > 0 < Fxu or Fxu < 0 > Fxi:
+            msg = ("<p>Segun el teorema de bolzano, existe una raiz si la funcion evaluada tanto en Xi como Xu tienen signo diferente.</p><p>F(Xi)="+str(Fxi)+"</p><p>F(Xu)="+str(Fxu)+"</p>"+
+            "<p>Pruebe otro intervalo o cambie la funcion.</p>")
+            cnv = 0
+        elif Xi > Xu :
+            msg = "Xi no puede ser mayor que Xu."
+            cnv = 0
+        elif n < 2:
+            msg = "Cambie el valor de n, recomendamos que sea minimo 2."
+            cnv = 0
+        if cnv == 1:
+            while Ea > Es:
+                Xr_old = Xr
+                Xu_old = Xu
+                Xi_old = Xi
+                try:
+                    Xr = float((Xi+Xu)/2)
+                    if math.isnan(Xr):
+                        Ea=0
+                except ZeroDivisionError:
+                     Xr = 0
+                try:
+                    Fxi = expr.subs(a,Xi)
+                    if math.isnan(Fxi):
+                        Fxi=0
+                except ZeroDivisionError:
+                    Fxi = 0
+                try:
+                    Fxu = expr.subs(a,Xr)
+                    if math.isnan(Fxu):
+                            Fxu=0
+                except ZeroDivisionError:
+                    Fxu = 0
+                prodF = Fxi*Fxu
+                if prodF < 0:
+                    Xi = Xi
+                    Xu = Xr  
+                elif prodF > 0:
+                    Xi = Xr
+                    Xu = Xu        
+                if i >= 1:
+                    try:
+                        Ea = abs((Xr_old-Xr)/Xr_old)*100
+                        if math.isnan(Ea):
+                            Ea=0
+                    except ZeroDivisionError:
+                        Ea = 0
+                i=i+1  
+                data.append([str(i),str(Xi_old),str(Xu_old),str(Xr),str(Fxi),str(Fxu),str(prodF),str(Ea)])
+                if i == 100:
+                    msg = "Se ha detectado divergencia con los valores ingresados. Puede probar otro metodo."
+                    return JsonResponse({'msg':msg,'code':1})
+                    break
+            root = Xr
+            f = latex(expr)
+            #data = request.POST.get("f")
+            return JsonResponse({'result':[{'root':root,'Es':Es,'f':f}],'rows':data,'code':0})
+        else:
+            return JsonResponse({'msg':msg,'code':1})
+    except Exception as e:
+        msg = ("<p>Se ha detectado una indeterminacion con los valores ingresados. Puede probar otro metodo u otro intervalo.</p>"+
+               "<p>"+str(e)+"</p>"
+               )
+        return JsonResponse({'msg':msg,'code':1})
 
-        if i >= 1:
-            Ea = abs((Xr_old-Xr)/Xr_old)*100
-        i=i+1  
-        data.append([str(i),str(Xi_old),str(Xu_old),str(Xr),str(Fxi),str(Fxu),str(prodF),str(Ea)])
-    root = Xr
-    f = latex(expr)
-    #data = request.POST.get("f")
-    return JsonResponse({'result':[{'root':root,'Es':Es,'f':f}],'rows':data})
+def regla_falsa(request):
+    msg=""
+    cnv=1
+    a= symbols('x')
+    Xi = float(request.POST.get('Xi'))
+    Xu = float(request.POST.get('Xu'))
+    expr = request.POST.get('f')
+    #fx = lambda x: request.POST.get('f')
+    n = int(request.POST.get('n'))
+    i = 0
+    tabla = []
+    try:
+        Es = (0.5*(10**(2-n)))
+        expr = parse_expr(expr)
+        tramo = abs(Xu-Xi)
+        #Fxi = expr.subs(a,Xi)
+        fa = expr.subs(a,Xi)
+        fb = expr.subs(a,Xu)
+        if fa > 0 < fb or fb < 0 > fa:
+            msg = ("<p>Segun el teorema de bolzano, existe una raiz si la funcion evaluada tanto en Xi como Xu tienen signo diferente.</p><p>F(Xi)="+str(fa)+"</p><p>F(Xu)="+str(fb)+"</p>"+
+                   "<p>Pruebe otro intervalo o cambie la funcion.</p>")
+            cnv = 0
+        elif n < 2:
+            msg = "Cambie el valor de n, recomendamos que sea minimo 2."
+            cnv = 0
+        if Xi > Xu :
+            msg = "Xi no puede ser mayor que Xu."
+            cnv = 0
+        if cnv == 1:
+            while not(tramo<=Es):    
+                i = i+1
+                try:
+                    c = float(Xu-fb*(Xi-Xu)/(fa-fb))
+                    if math.isnan(c):
+                        c=0
+                except ZeroDivisionError:
+                    c == 0
+                try:
+                    fc = expr.subs(a,c)
+                    if math.isnan(fc):
+                        fc=0
+                except ZeroDivisionError:
+                    c == 0
+                tabla.append([str(i),str(Xi),str(Xu),str(fa),str(fb),str(c),str(fc),str(tramo)])
+                cambio = np.sign(fa)*np.sign(fc)
+                if cambio>0:
+                    tramo = abs(c-Xi)
+                    Xi = c
+                    fa = fc
+                else:
+                    tramo = abs(Xu-c)
+                    Xu = c
+                    fb = fc
+                if i == 100:
+                    msg = "Se ha detectado divergencia con los valores ingresados. Puede probar otro metodo."
+                    return JsonResponse({'msg':msg,'code':1})
+                    break
+            root = c
+            f = latex(expr)
+            return JsonResponse({'result':[{'root':root,'Es':Es,'f':f}],'rows':tabla,'code':0})
+        else:
+            return JsonResponse({'msg':msg,'code':1})
+    except Exception as e:
+        msg = ("<p>Se ha detectado una indeterminacion con los valores ingresados. Puede probar otro metodo u otro intervalo.</p>"+
+               "<p>"+str(e)+"</p>"
+               )
+        return JsonResponse({'msg':msg,'code':1})
+
+
+
 
 def rapshon_newton(request):
+    msg=""
+    cnv=1
     a= symbols("x")
     Xi = float(request.POST.get('Xi'))
     expr = request.POST.get('f')
@@ -106,24 +229,66 @@ def rapshon_newton(request):
     Fxi = 0
     Fprim_xi = 0
     data = []
-    Es = (0.5*(10**(2-n)))
-    expr = parse_expr(expr)
-    expr_diff = diff(expr,a) 
-    while Ea > Es:
-        Xi_old = Xi
-        Fxi = expr.subs(a,Xi)
-        Fprim_xi = expr_diff.subs(a,Xi)
-        Xi_nxt = Xi-(Fxi/Fprim_xi)
-        Ea = abs(((Xi_nxt-Xi)/Xi_nxt))*100
-        Xi = Xi_nxt
-        i=i+1  
-        data.append([str(i),str(Xi_old),str(Fxi),str(Fprim_xi),str(Xi_nxt),str(Ea)])
-    root = Xi_nxt
-    f = latex(expr)
-    expr_diff = latex(expr_diff)
-    return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f,"fprim":str(expr_diff)}],'rows':data})
+    try:
+        Es = (0.5*(10**(2-n)))
+        expr = parse_expr(expr)
+        expr_diff = diff(expr,a)
+    
+        if n < 2:
+            msg = "Cambie el valor de n, recomendamos que sea minimo 2."
+            cnv = 0
+        if cnv == 1:
+            while Ea > Es:
+                Xi_old = Xi
+                try:
+                    Fxi = expr.subs(a,Xi)
+                    if math.isnan(Fxi):
+                        Fxi=0
+                except ZeroDivisionError:
+                    Fxi = 0
+                try:
+                    Fprim_xi = expr_diff.subs(a,Xi)
+                    if math.isnan(Fprim_xi):
+                        Fprim_xi=0
+                except ZeroDivisionError:
+                    Fprim_xi = 0
+
+                try:
+                    Xi_nxt = Xi-(Fxi/Fprim_xi)
+                    if math.isnan(Xi_nxt):
+                        Xi_nxt=0
+                except ZeroDivisionError:
+                    Xi_nxt = 0
+                   
+                if i >= 1:
+                    try:
+                        Ea = abs(((Xi_nxt-Xi)/Xi_nxt))*100
+                        if math.isnan(Ea):
+                            Ea=0
+                    except ZeroDivisionError:
+                        Ea = 0
+                Xi = Xi_nxt
+                i=i+1  
+                data.append([str(i),str(Xi_old),str(Fxi),str(Fprim_xi),str(Xi_nxt),str(Ea)])
+                if i == 100:
+                    msg = "Se ha detectado divergencia con los valores ingresados. Puede probar otro metodo."
+                    return JsonResponse({'msg':msg,'code':1})
+                    break
+            root = Xi_nxt
+            f = latex(expr)
+            expr_diff = latex(expr_diff)
+            return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f,"fprim":str(expr_diff)}],'rows':data})
+        else:
+            return JsonResponse({'msg':msg,'code':1})
+    except Exception as e:
+        msg = ("<p>Se ha detectado una indeterminacion con los valores ingresados. Puede probar otro valor.</p>"+
+               "<p>"+str(e)+"</p>"
+               )
+        return JsonResponse({'msg':msg,'code':1})
 
 def secante(request):
+    msg=""
+    cnv=1
     Xi = float(request.POST.get('Xi'))
     expr = request.POST.get('f')
     n =  int(request.POST.get('n'))
@@ -136,23 +301,127 @@ def secante(request):
     Fxi = 0
     Fxi_ant = 0
     data = []
-    Es = (0.5*(10**(2-n)))
+    try:
+        Es = (0.5*(10**(2-n)))
+        expr = parse_expr(expr)
+    
+        if n < 2:
+            msg = "Cambie el valor de n, recomendamos que sea minimo 2."
+            cnv = 0
+        if cnv == 1:
+            while Ea > Es:
+                if i < 1:
+                    Xi_ant = Xi-1
+                elif i > 0 :
+                    Xi_ant = Xi_old
+                Xi_old = Xi
+                Xi_nxt_old = Xi_nxt
+                try:
+                    Fxi = expr.subs(a,Xi)
+                    if math.isnan(Fxi):
+                        Fxi=0
+                except ZeroDivisionError:
+                    Fxi = 0
+                try: 
+                    Fxi_ant = expr.subs(a,Xi_ant)
+                    if math.isnan(Fxi_ant):
+                        Fxi_ant=0
+                except ZeroDivisionError:
+                    Fxi_ant = 0
+                try:
+                    Xi_nxt = Xi-((Fxi*(Xi_ant-Xi))/(Fxi_ant-Fxi))
+                    if math.isnan(Xi_nxt):
+                        Xi_nxt=0
+                except ZeroDivisionError:
+                    Xi_ant = 0
+                Xi = Xi_nxt
+                if i >= 1:
+                    try:
+                        Ea = abs(((Xi_nxt_old-Xi_nxt)/Xi_nxt))*100
+                        if math.isnan(Ea):
+                            Ea=0
+                    except ZeroDivisionError:
+                        Ea = 0
+                i=i+1  
+                data.append([str(i),str(Xi_old),str(Xi_ant),str(Xi_nxt),str(Fxi),str(Fxi_ant),str(Ea)])
+                if i == 100:
+                    msg = "Se ha detectado divergencia con los valores ingresados. Puede probar otro metodo."
+                    return JsonResponse({'msg':msg,'code':1})
+                    break
+            root = Xi_nxt
+            f = latex(expr)
+            return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f}],'rows':data})
+        else:
+            return JsonResponse({'msg':msg,'code':1})
+    except Exception as e:
+        msg = ("<p>Se ha detectado una indeterminacion con los valores ingresados. Puede probar otro valor.</p>"+
+               "<p>"+str(e)+"</p>"
+               )
+        return JsonResponse({'msg':msg,'code':1})
+
+def punto_fijo(request):
+    msg=""
+    cnv= 1
+    Xi = float(request.POST.get('Xi'))
+    expr = request.POST.get('f')
+    expr2 = request.POST.get('g')
+    n =  int(request.POST.get('n'))
+    a= symbols("x")
+    Ea = 100
+    i = 0
+    iteramax = 100
+    respuesta = 0
+    data = []
     expr = parse_expr(expr)
-    while Ea > Es:
-        if i < 1:
-            Xi_ant = Xi-1
-        elif i > 0 :
-            Xi_ant = Xi_old
-        Xi_old = Xi
-        Xi_nxt_old = Xi_nxt
-        Fxi = expr.subs(a,Xi)
-        Fxi_ant = expr.subs(a,Xi_ant)
-        Xi_nxt = Xi-((Fxi*(Xi_ant-Xi))/(Fxi_ant-Fxi))
-        Xi = Xi_nxt
-        if i >= 1:
-            Ea = abs(((Xi_nxt_old-Xi_nxt)/Xi_nxt))*100
-        i=i+1  
-        data.append([str(i),str(Xi_old),str(Xi_ant),str(Xi_nxt),str(Fxi),str(Fxi_ant),str(Ea)])
-    root = Xi_nxt
-    f = latex(expr)
-    return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f}],'rows':data})
+    expr2 = parse_expr(expr2)
+    expr2_diff = diff(expr2,a)
+    cnv_val = expr2_diff.subs(a,Xi)
+    try:
+        Es = (0.5*(10**(2-n)))
+        try:
+            b = expr2.subs(a,Xi)
+            if math.isnan(b):
+                b=0
+        except ZeroDivisionError:
+            b = 0
+        tramo = abs(b-Xi)
+        if cnv_val >= 1:
+            msg = ("<p>Con los datos ingresados se detecta una divergencia.</p>"+
+                   "<p>La derivada de g'(Xi) debe ser menor a 1 para determinar una solucion</p>"+
+                   "<p>g'(Xi)="+str(cnv_val)+"</p>"+
+                   "<p>Puede probar otro metodo</p>"
+                  )
+            cnv = 0
+        if n < 2:
+            msg = "Cambie el valor de n, recomendamos que sea minimo 2."
+            cnv = 0
+        if cnv == 1:
+            while tramo>=Es :
+                Xi = b
+                try:
+                    b = float(expr2.subs(a,Xi))
+                    if math.isnan(b):
+                        b=0
+                except ZeroDivisionError:
+                    b = 0
+                tramo = abs((Xi-b)/b)*100
+                i = i + 1
+                data.append([str(i),str(b),str(tramo)])
+                if (i==iteramax ):
+                    msg = "Se ha detectado divergencia con los valores ingresados. Puede probar otro metodo."
+                    return JsonResponse({'msg':msg,'code':1})
+                    break
+            respuesta = b
+           
+
+            root = respuesta
+            f = latex(expr)
+            g = latex(expr2)
+            return JsonResponse({'result':[{'root':str(root),'Es':str(Es),"f":f,"g":g}],'rows':data})
+        else:
+             return JsonResponse({'msg':msg,'code':1})
+    except Exception as e:
+        msg = ("<p>Se ha detectado una indeterminacion con los valores ingresados. Puede probar otro valor.</p>"+
+               "<p>"+str(e)+"</p>"
+               )
+        return JsonResponse({'msg':msg,'code':1})
