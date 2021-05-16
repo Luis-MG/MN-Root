@@ -27,9 +27,17 @@ urlpatterns = [
          name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('admin/', admin.site.urls),
+    path('sel/', views.sel, name='sel'),
+    
+    # FUNCIONES RAICES
     path('biseccion/', views.biseccion, name='biseccion' ),
     path('regla_falsa/', views.regla_falsa, name='regla_falsa' ),
     path('rapshon_newton/', views.rapshon_newton, name='rapshon_newton' ),
     path('secante/', views.secante, name='secante' ),
     path('punto_fijo/', views.punto_fijo, name='punto_fijo' ),
+    
+    #FUNCIONES SEL
+    path('sel/eliminacion_gauss/', views.eliminacion_gauss, name='eliminacion_gauss' ),
+    path('sel/gauss_jordan/', views.gauss_jordan, name='gauss_jordan' ),
+    
 ]

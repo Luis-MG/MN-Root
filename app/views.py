@@ -11,8 +11,7 @@ from django.http import QueryDict
 from sympy import *
 import numpy as np
 import math
-
-
+import json
 
 
 def home(request):
@@ -23,6 +22,19 @@ def home(request):
         'app/index.html',
         {
             'title':'Home Page',
+            'year':datetime.now().year,
+        }
+    )
+
+def sel(request):
+    """Renders the contact page."""
+    assert isinstance(request, HttpRequest)
+    return render(
+        request,
+        'app/sel.html',
+        {
+            'title':'Sistema de Ecuaciones Lineales',
+            'message':'Your contact page.',
             'year':datetime.now().year,
         }
     )
@@ -54,6 +66,7 @@ def about(request):
     )
 
 
+# METODOS NUMERICOS RAICES
 def biseccion(request):
     msg=""
     cnv=1
@@ -212,9 +225,6 @@ def regla_falsa(request):
                "<p>"+str(e)+"</p>"
                )
         return JsonResponse({'msg':msg,'code':1})
-
-
-
 
 def rapshon_newton(request):
     msg=""
@@ -425,3 +435,128 @@ def punto_fijo(request):
                "<p>"+str(e)+"</p>"
                )
         return JsonResponse({'msg':msg,'code':1})
+
+
+# METODOS NUMERICOS SEL
+def eliminacion_gauss(request):
+    msg=""
+    code = 0
+    expr_i = ""  
+    expr_a = ""
+    expr_x = ""
+    n = int(request.POST.get('n'))
+    x = np.zeros(n)
+    a = np.zeros((n,n+1))
+    for i in range(n):
+        a[i] = request.POST.getlist('x['+str(i)+'][]')
+
+    a = a.astype(np.float)
+    a, code = matrix_adjust(n,a)
+    expr_i = matrix_latex(a,n)
+    for i in range(n):            
+        for j in range(i+1, n):
+            try:
+                ratio = a[j][i]/a[i][i]
+            except ZeroDivisionError:
+                ratio = 0         
+            for k in range(n+1):
+                a[j][k] = a[j][k] - ratio * a[i][k]
+
+    # Back Substitution
+    x[n-1] = a[n-1][n]/a[n-1][n-1]
+    for i in range(n-2,-1,-1):
+        x[i] = a[i][n]
+        for j in range(i+1,n):     
+            x[i] = x[i] - a[i][j]*x[j]
+
+        x[i] = x[i]/a[i][i]
+    if np.isnan(a).any():
+        msg = "No hay solucion con el sistema de ecuaciones ingresado."
+        return JsonResponse({'msg':msg,'code':1})
+
+    expr_a = matrix_latex(a,n)
+    expr_x = result_latex(x,n)
+   
+    #return JsonResponse({'result':[{'x':str(x),'a':str(a)}]})
+    return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x)}], 'code':code})
+
+def gauss_jordan(request):
+    msg=""
+    code = 0
+    expr_i = ""  
+    expr_a = ""
+    expr_x = ""
+    n = int(request.POST.get('n'))
+    x = np.zeros(n)
+    a = np.zeros((n,n+1))
+    for i in range(n):
+        a[i] = request.POST.getlist('x['+str(i)+'][]')
+
+    a = a.astype(np.float)
+    a, code = matrix_adjust(n,a)
+    expr_i = matrix_latex(a,n)
+    for i in range(n):
+        piv = a[i][i]
+        for j in range(n+1):
+            if a[i][j] == 0:
+                a[i][j] = 0
+            else:
+                a[i][j] = a[i][j]/piv
+
+        for k in range(n):
+            if k != i:
+                ration = a[k][i]
+
+                for l in range(n+1):
+                    a[k][l]=a[k][l]-a[i][l]*ration
+
+    for i in range(n):
+        x[i] = a[i][n]
+    if np.isnan(a).any():
+        msg = "No hay solucion con el sistema de ecuaciones ingresado."
+        return JsonResponse({'msg':msg,'code':1})
+    expr_a = matrix_latex(a,n)
+    expr_x = result_latex(x,n)
+    return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x)}], 'code':code})
+
+def matrix_adjust(n,a):
+    code = 0
+    for i in range(n):
+        if a[i][i]==0:
+            for j in range (n):
+                if a[j][i] != 0:
+                    a[[i,j]] = a[[j,i]]
+            code = 2
+
+    return a, code
+
+def matrix_latex(a,n):
+    txt=('\['+
+        '\left['+
+        '\\begin{'+'array}{')
+    for i in range(n):
+        txt= txt+'c'
+    txt = txt+'|c}'
+    for i in range(n):     
+        for j in range(n+1):
+            if j == n:
+                txt = txt + str(a[i][j])
+            else:
+                txt = txt + str(a[i][j])+'&'
+
+        txt = txt + r'\\' 
+            
+    txt = txt + ('\end{'+'array}'+
+        '\\right]'+
+        '\\]')
+    return txt
+
+def result_latex(x,n):
+    txt =('\['+
+        '\left\{\\begin{matrix}')
+    for i in range(n):
+        txt = txt + 'X_{'+str(i)+'} = '+ str(x[i]) 
+        if i < n:
+            txt = txt + r'\\'
+    txt = txt + ('\end{'+'matrix}\\right.\]')
+    return txt
