@@ -519,6 +519,49 @@ def gauss_jordan(request):
     expr_x = result_latex(x,n)
     return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x)}], 'code':code})
 
+def gauss_seidel(request):
+    msg=""
+    code = 0
+    expr_i = ""  
+    expr_a = ""
+    expr_e = ""
+    expr_x = ""
+    c = int(request.POST.get('c')) # cifras significativas
+    n = int(request.POST.get('n')) # numero de variables
+    x = np.zeros(n) # matriz de variables
+    a = np.zeros((n,n+1)) # matriz ingreso
+    es = (0.5*(10**(2-c))) # error estimado
+    e = np.full(n,1.) # matriz de errores aproximados 
+    cent = False # centinela para el error
+    x_old = np.zeros(n) #array de x anteriores
+    it = 0 #Control de iteraciones
+    for i in range(n):
+        a[i] = request.POST.getlist('x['+str(i)+'][]')
+
+    a = a.astype(np.float)
+    e = e.astype(np.float)
+    a, code = matrix_adjust(n,a)
+    expr_i = matrix_latex(a,n)
+
+    a, code = check_determinant(a,n)
+    expr_a = matrix_latex(a,n)
+    while cent == False:
+        for i in range (n):
+            x_old[i] = x[i]
+
+        x = seidel(a, x, n)
+        for i in range(n):
+            if it > 0:
+                e[i] = abs((x_old[i]-x[i])/x_old[i])
+        if all(j < es for j in e):
+            cent = True
+        it = it + 1
+
+    expr_x = result_latex(x,n)
+    expr_e = result_latex(e,n)
+
+    return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x),'e':str(expr_e),'es':str(es)}], 'code':code})
+
 def matrix_adjust(n,a):
     code = 0
     for i in range(n):
@@ -560,3 +603,37 @@ def result_latex(x,n):
             txt = txt + r'\\'
     txt = txt + ('\end{'+'matrix}\\right.\]')
     return txt
+
+def check_determinant(a,n):
+    # ordenar matriz
+    for i in range(n):
+        max_val = a[i][i]        
+    for j in range(n):
+        if max_val < abs(a[j][i]):
+            max_val = a[j][i]
+            a[[i,j]] = a[[j,i]]
+    
+    for i in range(n):
+        for j in range(n):
+            if abs(a[i][i]) < abs(a[i][j]):
+                msg = "el sistema de ecuaciones no cumple con el factor determinante y no podrian convergir los valores de las variables con este metodo."
+                return JsonResponse({'msg':msg,'code':1})
+                break
+    code = 2
+    return a, code
+
+def seidel(a, x ,n):
+                 
+    # for loop for 3 times as to calculate x, y , z
+    for j in range(0, n):        
+        # temp variable d to store b[j]
+        d = a[j][n]                  
+          
+        # to calculate respective xi, yi, zi
+        for i in range(0, n):     
+            if(j != i):
+                d-=a[j][i] * x[i]
+        # updating the value of our solution        
+        x[j] = d / a[j][j]
+    # returning our updated solution           
+    return x    

@@ -39,5 +39,5 @@ urlpatterns = [
     #FUNCIONES SEL
     path('sel/eliminacion_gauss/', views.eliminacion_gauss, name='eliminacion_gauss' ),
     path('sel/gauss_jordan/', views.gauss_jordan, name='gauss_jordan' ),
-    
+    path('sel/gauss_seidel/', views.gauss_seidel, name='gauss_seidel' ),
 ]
