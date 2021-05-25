@@ -522,6 +522,7 @@ def gauss_jordan(request):
 def gauss_seidel(request):
     msg=""
     code = 0
+    it = 0
     expr_i = ""  
     expr_a = ""
     expr_e = ""
@@ -541,11 +542,18 @@ def gauss_seidel(request):
     a = a.astype(np.float)
     e = e.astype(np.float)
     a, code = matrix_adjust(n,a)
+    if np.isnan(a).any() or np.all((a==0)):
+        msg = "No hay solucion con el sistema de ecuaciones ingresado."
+        return JsonResponse({'msg':msg,'code':1})
     expr_i = matrix_latex(a,n)
 
     a, code = check_determinant(a,n)
+    if code == 1:
+        msg = "el sistema de ecuaciones no cumple con el factor determinante y no podrian convergir los valores de las variables con este metodo."
+        return JsonResponse({'msg':msg,'code':1})
+
     expr_a = matrix_latex(a,n)
-    while cent == False:
+    while cent == False or it < 150:
         for i in range (n):
             x_old[i] = x[i]
 
@@ -608,17 +616,16 @@ def check_determinant(a,n):
     # ordenar matriz
     for i in range(n):
         max_val = a[i][i]        
-    for j in range(n):
-        if max_val < abs(a[j][i]):
-            max_val = a[j][i]
-            a[[i,j]] = a[[j,i]]
+        for j in range(n):
+            if max_val < abs(a[j][i]):
+                max_val = a[j][i]
+                a[[i,j]] = a[[j,i]]
     
     for i in range(n):
         for j in range(n):
             if abs(a[i][i]) < abs(a[i][j]):
-                msg = "el sistema de ecuaciones no cumple con el factor determinante y no podrian convergir los valores de las variables con este metodo."
-                return JsonResponse({'msg':msg,'code':1})
-                break
+                code = 1
+                return a, code
     code = 2
     return a, code
 

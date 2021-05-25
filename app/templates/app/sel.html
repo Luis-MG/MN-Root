@@ -155,8 +155,8 @@
   </div>
 
 
-      <div >
-        <div class="input-group mb-3">
+      <div id="es_div" style="display:none; " >
+        <div class="input-group ">
           <span class="input-group-text" id="">Error estimado</span>
           <input id="Es" type="text" class="form-control text-success" placeholder="" aria-label="Error_estimado" aria-describedby="Error_estimado" disabled>
         </div>
@@ -240,9 +240,11 @@
             if ($(this).val() == "gauss_seidel") {
                 //$('#a').hide();
                 $('#es').show();
+                $('#es_div').show();
             } else {
                 //$('#a').show();
                 $('#es').hide();
+                $('#es_div').hide();
             }
 
 
@@ -290,15 +292,16 @@
 
                     }
                     
-                    $('#submit_text').removeClass('spinner-grow spinner-grow-sm');
+                    
                 });
-                
+                $('#submit_text').removeClass('spinner-grow spinner-grow-sm');
             }
             else
             {
                 $('#modalTitle').html('Error');
                 $('#modalMsg').html("Los campos no cumplen las condiciones.");
                 $('#modalAlert').modal('toggle');
+
             }
         })
 
