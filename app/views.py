@@ -473,8 +473,10 @@ def eliminacion_gauss(request):
     if np.isnan(a).any():
         msg = "No hay solucion con el sistema de ecuaciones ingresado."
         return JsonResponse({'msg':msg,'code':1})
-
+    
+    a = np.around(a, decimals=5)
     expr_a = matrix_latex(a,n)
+    x = np.around(x, decimals=5)
     expr_x = result_latex(x,n)
    
     #return JsonResponse({'result':[{'x':str(x),'a':str(a)}]})
@@ -515,7 +517,9 @@ def gauss_jordan(request):
     if np.isnan(a).any():
         msg = "No hay solucion con el sistema de ecuaciones ingresado."
         return JsonResponse({'msg':msg,'code':1})
+    a = np.around(a, decimals=5)
     expr_a = matrix_latex(a,n)
+    x = np.around(x, decimals=5)
     expr_x = result_latex(x,n)
     return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x)}], 'code':code})
 
@@ -553,7 +557,7 @@ def gauss_seidel(request):
         return JsonResponse({'msg':msg,'code':1})
 
     expr_a = matrix_latex(a,n)
-    while cent == False or it < 150:
+    while cent == False:
         for i in range (n):
             x_old[i] = x[i]
 
@@ -564,11 +568,16 @@ def gauss_seidel(request):
         if all(j < es for j in e):
             cent = True
         it = it + 1
-
+        if it > 150:
+            msg = "Se han alcanzado 150 iteraciones y los resultados estan divergiendo."
+            code = 2
+            break
+    x = np.around(x, decimals=(c+2))
     expr_x = result_latex(x,n)
+    e = np.around(e, decimals=(c+2))
     expr_e = result_latex(e,n)
 
-    return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x),'e':str(expr_e),'es':str(es)}], 'code':code})
+    return JsonResponse({'result':[{'i':str(expr_i),'a':str(expr_a),'x':str(expr_x),'e':str(expr_e),'es':str(es)}], 'code':code, 'msg':msg})
 
 def matrix_adjust(n,a):
     code = 0
@@ -614,12 +623,11 @@ def result_latex(x,n):
 
 def check_determinant(a,n):
     # ordenar matriz
-    for i in range(n):
-        max_val = a[i][i]        
+    for i in range(n):         
         for j in range(n):
-            if max_val < abs(a[j][i]):
-                max_val = a[j][i]
+            if abs(a[i][i]) < abs(a[j][i]):
                 a[[i,j]] = a[[j,i]]
+                break
     
     for i in range(n):
         for j in range(n):

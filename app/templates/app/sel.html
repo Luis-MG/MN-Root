@@ -7,7 +7,7 @@
 
         <p class="h4">Ingrese datos:</p>
         <div class="container">
-            <div class="d-flex flex-row bd-highlight mb-3">
+            <div class="d-flex flex-row bd-highlight ">
                 <div class="p-2 bd-highlight" style="vertical-align: middle">
                     <p>Numero de variables:</p>
                 </div>
@@ -22,7 +22,7 @@
             </div>
 
 
-            <div class="d-flex flex-row bd-highlight mb-3">
+            <div class="d-none flex-row bd-highlight " id="c_div"  >
                 <div class="p-2 bd-highlight" style="vertical-align: middle">
                     <p>Cifras significativas:</p>
                 </div>
@@ -56,36 +56,17 @@
                     </div>
                 </div>
             </div>
+
+           
             <div class="col-sm-3">
                 <div class="collapse multi-collapse" id="multiCollapseExample1">
                    <div class="card border-primary mb-3" style="max-width: 18rem;">
-                      <div class="card-header">Formato</div>
+                      <div class="card-header">Resultado</div>
                       <div class="card-body text-secondary">
-                        <h5 class="card-title">Potencias</h5>
-                        <p class="card-text">Usa doble asterisco {**} para expresar potencias<br /> Ej. x**5</p>
-                      </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="collapse multi-collapse" id="multiCollapseExample1">
-                   <div class="card border-primary mb-3" style="max-width: 18rem;">
-                      <div class="card-header">Formato</div>
-                      <div class="card-body text-secondary">
-                        <h5 class="card-title">Parentesis</h5>
-                        <p class="card-text">El orden de las operaciones matematicas se realiza del parentesis interno al externo<br /> Ej. 5*(4-2)/(5-5) = 10</p>
-                      </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="collapse multi-collapse" id="multiCollapseExample1">
-                   <div class="card border-primary mb-3" style="max-width: 18rem;">
-                      <div class="card-header">Formato</div>
-                      <div class="card-body text-secondary">
-                        <h5 class="card-title">Para funciones compuestas</h5>
-                        <p class="card-text">Usa {ln()} para expresar logarimos naturales<br /> Ej. ln(1)</p>
-                          <p class="card-text">Usa {exp()} para expresar exponenciales<br /> Ej. exp(1.25)</p>
+                        <h5 class="card-title">Decimales (Resultado)</h5>
+                        <p class="card-text">Son redondeados a un maximo de 5 decimales.</p>
+
+                          <p class="card-text">Con Gauss-Seidel los decimales varian segun las cifras significativas.</p>
                       </div>
                     </div>
                 </div>
@@ -141,7 +122,7 @@
     </p>
   </div>
   <div id="a" class="card-body" >
-    <h5 class="card-title">Matriz resultante </h5>
+    <h5 class="card-title">Matriz Resultante </h5>
     <p id="latex_a" class="card-text"></p>
   </div>
   <div id="x" class="card-body" >
@@ -241,10 +222,14 @@
                 //$('#a').hide();
                 $('#es').show();
                 $('#es_div').show();
+                $('#c_div').addClass("d-flex");
+                $('#c_div').removeClass("d-none");
             } else {
                 //$('#a').show();
                 $('#es').hide();
                 $('#es_div').hide();
+                $('#c_div').addClass("d-none");
+                $('#c_div').removeClass("d-flex");
             }
 
 
